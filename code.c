@@ -46,16 +46,16 @@ if (digitalRead(inicio) == HIGH) {
     delay(500);
   }
  
-  //old_proxsensor = actual_proxsensor;
-  //Serial.println(actual_proxsensor);
-  //Serial.println();
+  old_proxsensor = actual_proxsensor;
+  Serial.println(actual_proxsensor);
+  Serial.println();
   if(RUN == true && REVERSE == false && GO == true){
     Serial.println("true");
     analogWrite(IN3, 0);
     analogWrite(IN4, 255);
     delay(5);
   } else {
-    //Serial.println("false");
+    Serial.println("false");
     analogWrite(IN3, 0);
     analogWrite(IN4, 0);
   }
