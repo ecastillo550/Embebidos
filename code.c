@@ -1,70 +1,67 @@
-int IN3 = 5;    // Input3 conectada al pin 5
-int IN4 = 3;    // Input4 conectada al pin 4
+int directaPin = 5;
+int reversaPin = 3;
 int ledPin = 13;
-int inicio = 2;        
 int velsensor = 4;
 int proxsensor = 3;
- 
+
 boolean RUN = false;
 boolean REVERSE = false;
-boolean GO = false;
-float thigh = 1/200;
-float tlow = 1/200;
-int old_proxsensor = 1024;
-int actual_proxsensor = 1024;
- 
+int reverseVel = 0;
+int proxsensorVal = 1024;
+unsigned long timeInicio = millis();
+unsigned long timeTotal = 0;
+double rapidezActual = 0;
+
 void setup() {
   pinMode(ledPin, OUTPUT);
-  pinMode(inicio, INPUT);
-  pinMode (IN3, OUTPUT);
-  pinMode (IN4, OUTPUT);
+  pinMode (reversaPin, OUTPUT);
+  pinMode (directaPin, OUTPUT);
   pinMode (velsensor, INPUT);
   pinMode (proxsensor, INPUT);
   Serial.begin(9600);
 }
- 
-void loop() {    
- 
-  if(analogRead(velsensor) < 975) {
+
+void directa(int velocidad) {
+  analogWrite(directaPin, velocidad);
+  analogWrite(reversaPin, 0);
+}
+
+void reversa(int velocidad) {
+  analogWrite(directaPin, 0);
+  analogWrite(reversaPin, velocidad);
+}
+
+void detener() {
+  analogWrite(directaPin, 0);
+  analogWrite(reversaPin, 0);
+}
+
+void loop() {
+  if(analogRead(velsensor) < 800) {
      digitalWrite(ledPin, HIGH);
+     timeTotal = millis() - timeInicio;
+     timeInicio = millis();
+     if(timeTotal > 10) {
+       //4 cm radio = 12.5664   --- 1mm/ms = 1m/s
+       rapidezActual = 125.664 / timeTotal;
+     }
   } else {
      digitalWrite(ledPin, LOW);
+     if (millis() - timeInicio > 3800) {
+       rapidezActual = 0;
+     }
   }
-if (digitalRead(inicio) == HIGH) {
-    GO = true;
-  } else {
-    GO = false;
+
+  Serial.println(rapidezActual);
+  proxsensorVal = analogRead(proxsensor);
+  if (proxsensorVal > 50) {
+    directa(255);
+  } else if(proxsensorVal < 50 && proxsensorVal > 18) {
+    detener();
+  } else if (analogRead(proxsensor) < 18){
+    reverseVel = map(proxsensorVal, 12, 18, 0, 255);
+    reversa(reverseVel);
   }
- 
-    actual_proxsensor = analogRead(proxsensor);
-  if(actual_proxsensor > 15) {
-    RUN = true;
-    REVERSE = false;
-  } else {
-    RUN = false;
-    REVERSE = true;
-    delay(500);
-  }
- 
-  old_proxsensor = actual_proxsensor;
-  Serial.println(actual_proxsensor);
-  Serial.println();
-  if(RUN == true && REVERSE == false && GO == true){
-    Serial.println("true");
-    analogWrite(IN3, 0);
-    analogWrite(IN4, 255);
-    delay(5);
-  } else {
-    Serial.println("false");
-    analogWrite(IN3, 0);
-    analogWrite(IN4, 0);
-  }
-  if(REVERSE == true && RUN == false && GO == true){
-    analogWrite(IN3, 110);
-    analogWrite(IN4, 0);
-    delay(5000);
-  } else {
-    analogWrite(IN3, 0);
-    analogWrite(IN4, 0);
-  }
+
+
 }
