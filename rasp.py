@@ -11,7 +11,7 @@ tiempoInicio = time.time();
 velocidadReferencia = 0.8;
 errorOld = 0;
 PIDvarOld = 0;
-K = 1999.58;
+K = 2740.02;
 ti = 0.976837;
 Ts = 0.033;
 
@@ -71,3 +71,4 @@ while True:
 		thread.start_new_thread(input_thread, (L,));
 		pass
 
+	print("estoy corriendo");
