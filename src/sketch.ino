@@ -12,6 +12,15 @@ unsigned long timeInicio = millis();
 unsigned long timeTotal = 0;
 double rapidezActual = 0;
 
+//variables para pid
+double velocidadPID = 0;
+double errorOld = 0;
+double PIDvarOld = 0;
+float K = 1999.58;
+float ti = 0.976837;
+float Ts = 0.033;
+double PIDvar = 0;
+
 void setup() {
   pinMode(ledPin, OUTPUT);
   pinMode (reversaPin, OUTPUT);
@@ -36,6 +45,27 @@ void detener() {
   analogWrite(reversaPin, 0);
 }
 
+double PID(float referenceVel, double velocidad) {
+  double respuesta = 0;
+  double errorActual = referenceVel - velocidad;
+
+  respuesta = PIDvarOld + (K/ti)*(Ts+ti)*errorActual - (K*errorOld);
+
+  //guardado de variables
+  errorOld = errorActual;
+  PIDvarOld = respuesta;
+
+  if(respuesta > 100){
+    respuesta = 100;
+  } else if (respuesta < 0) {
+    respuesta = 0;
+  }
+
+  Serial.println(respuesta);
+
+  return respuesta;
+}
+
 void loop() {
   if(analogRead(velsensor) < 800) {
      digitalWrite(ledPin, HIGH);
@@ -52,10 +82,11 @@ void loop() {
      }
   }
 
-  Serial.println(rapidezActual);
   proxsensorVal = analogRead(proxsensor);
   if (proxsensorVal > 50) {
-    directa(255);
+    //velocidadPID = PID(0.5, rapidezActual);
+    velocidadPID = map(PID(0.7, rapidezActual), 0, 100, 0, 255);
+    directa(velocidadPID);
   } else if(proxsensorVal < 50 && proxsensorVal > 18) {
     detener();
   } else if (analogRead(proxsensor) < 18){
