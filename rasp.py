@@ -1,5 +1,6 @@
 import time;
 import serial;
+import thread;
 
 arduino = serial.Serial('/dev/ttyUSB0', 9600);
 rapidezActual = 0;
@@ -14,6 +15,10 @@ K = 1999.58;
 ti = 0.976837;
 Ts = 0.033;
 
+def input_thread(L) :
+	string = raw_input();
+	L.append(string);
+
 def PID(velocidad):
 	global velocidadReferencia;
 	global errorOld;
@@ -24,7 +29,9 @@ def PID(velocidad):
 
 	errorActual = velocidadReferencia - velocidad;
 	respuesta = PIDvarOld + (K/ti)*(Ts+ti)*errorActual - (K*errorOld);
-
+	
+	print("ref: " + str(velocidadReferencia));
+	print("Error: " + str(errorActual));
 	errorOld = errorActual;
 	PIDvarOld = respuesta;
 
@@ -35,6 +42,8 @@ def PID(velocidad):
 
 	return respuesta;
 
+L = [];
+thread.start_new_thread(input_thread, (L,));
 
 while True:
 	#ver velocidad
@@ -44,7 +53,21 @@ while True:
 		tiempoVariable = time.time() - tiempoInicio;
 		tiempoInicio = time.time();
 		#4 cm radio = 12.5664   --- 1mm/ms = 1m/s
-		rapidezActual = 125.664 / tiempoVariable;
+		rapidezActual = 125.664 / (tiempoVariable*1000);
 		print("rapidez actual: " + str(rapidezActual));
+		pass
+	
+	print("PID: " + str(PID(rapidezActual)) + " \n ");
+	
+	if L :
+		try :
+			velocidadReferencia = float(L[0]);
+			print("La nueva velocidad de referencia sera: " + str(L[0]));
+		except :
+			print("no fue un numero valido");
+
+		del L 
+		L = [];
+		thread.start_new_thread(input_thread, (L,));
 		pass
 
