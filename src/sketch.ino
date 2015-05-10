@@ -13,6 +13,8 @@ unsigned long timeTotal = 0;
 int incomingByte = 0;
 int velocidadPID = 0;
 
+String toPi = 'ohsi';
+
 void setup() {
 	pinMode(ledPin, OUTPUT);
 	pinMode (reversaPin, OUTPUT);
@@ -32,9 +34,10 @@ void reversa(int velocidad) {
 	analogWrite(reversaPin, velocidad);
 }
 
-void detener() {
+void detener(velocidad) {
+	//casi lo mismo que reversa
 	analogWrite(directaPin, 0);
-	analogWrite(reversaPin, 0);
+	analogWrite(reversaPin, velocidad);
 }
 
 void loop() {
@@ -61,8 +64,10 @@ void loop() {
 	if (proxsensorVal > 50) {
 		directa(velocidadPID);
 	} else if(proxsensorVal < 50 && proxsensorVal > 18) {
-		detener();
-		Serial.println("::detener");
+		toPi = "::detener " + proxsensorVal;
+		Serial.println(toPi);
+		detener(velocidadPID);
+		//script para manejar velocidad y reversa
 	} else if (analogRead(proxsensor) < 18){
 		reverseVel = map(proxsensorVal, 12, 18, 0, 255);
 		reversa(reverseVel);
