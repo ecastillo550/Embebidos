@@ -8,7 +8,8 @@ boolean RUN = false;
 boolean REVERSE = false;
 int reverseVel = 0;
 int proxsensorVal = 1024;
-
+unsigned long timeInicio = millis();
+unsigned long timeTotal = 0;
 
 void setup() {
   pinMode(ledPin, OUTPUT);
@@ -37,9 +38,13 @@ void detener() {
 void loop() {
   if(analogRead(velsensor) < 800) {
      digitalWrite(ledPin, HIGH);
-     if(timeTotal > 10) {
+     timeTotal = millis() - timeInicio;
+     timeInicio = millis();
+     if(timeTotal > 20) {
        Serial.println("::velup");
      }
+  } else {
+     digitalWrite(ledPin, LOW);
   }
 
   proxsensorVal = analogRead(proxsensor);

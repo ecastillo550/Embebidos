@@ -4,6 +4,7 @@ import serial;
 arduino = serial.Serial('/dev/ttyUSB0', 9600);
 rapidezActual = 0;
 tiempoVariable = time.time();
+tiempoInicio = time.time();
 
 #variables de pid
 velocidadReferencia = 0.8;
@@ -29,7 +30,7 @@ def PID(velocidad):
 
 	if respuesta > 100 :
 		respuesta = 100;
-	else if respuesta < 0 :
+	elif respuesta < 0 :
 		respuesta = 0;
 
 	return respuesta;
@@ -38,11 +39,12 @@ def PID(velocidad):
 while True:
 	#ver velocidad
 	serialString = arduino.readline();
-	if serialString.find("::velup") == 1:
-		tiempoVariable = time.time() - tiempoVariable;
-		tiempoVariable = time.time();
+	#print(serialString);
+	if "::velup" in serialString:
+		tiempoVariable = time.time() - tiempoInicio;
+		tiempoInicio = time.time();
 		#4 cm radio = 12.5664   --- 1mm/ms = 1m/s
 		rapidezActual = 125.664 / tiempoVariable;
-		print("rapidez actual: " + rapidezActual);
+		print("rapidez actual: " + str(rapidezActual));
 		pass
 
