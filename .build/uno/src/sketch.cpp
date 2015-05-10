@@ -1,3 +1,12 @@
+#include <Arduino.h>
+
+void setup();
+void directa(int velocidad);
+void reversa(int velocidad);
+void detener();
+double PID(float referenceVel, double velocidad);
+void loop();
+#line 1 "src/sketch.ino"
 int directaPin = 5;
 int reversaPin = 3;
 int ledPin = 13;
