@@ -24,6 +24,7 @@ void setup() {
 	pinMode (proxsensor, INPUT);
 	Serial.begin(9600);
 	Serial.println("herw we go");
+	Serial.flush();
 }
 
 void directa(int velocidad) {
@@ -44,6 +45,7 @@ void detener(int velocidad) {
 
 
 void loop() {
+	//Serial.println("battlecruiser opperational");
 	if(analogRead(velsensor) < 800) {
 		digitalWrite(ledPin, HIGH);
 		timeTotal = millis() - timeInicio;
@@ -54,28 +56,32 @@ void loop() {
 	} else {
 		digitalWrite(ledPin, LOW);
 	}
-
 	proxsensorVal = analogRead(proxsensor);
 
 	//lectura de serial
 	while (Serial.available() > 0) {
-			// read the incoming byte:
-			recieve = Serial.readString();
-			if(recieve.toInt() < 500){
-				velocidadPID = map(recieve.toInt(), 0, 100, 0, 255);
-			} else {
-				reversa(255);
-				proxsensorVal = 1024;
+		recieve = Serial.readStringUntil('$');
+		//Serial.println(recieve.substring(0,2));
+		//Serial.println(recieve.substring(2));
+		if(recieve.substring(0,2) == "di"){
+			if(proxsensorVal > 50){
+				//Serial.println(recieve);
+				velocidadPID = map(recieve.substring(2).toInt(), 0, 100, 0, 255);
+				directa(velocidadPID);
 			}
-			Serial.println(recieve);
+		} else if(recieve.substring(0,2) == "re") {
+			reversa(255);
+			proxsensorVal = 1024;
+		}
+		//Serial.println(recieve);
 	}
 
 
-	if (proxsensorVal > 50) {
-		directa(velocidadPID);
-	} else if(proxsensorVal < 50 && proxsensorVal > 18) {
+	//if (proxsensorVal > 50) {
+	//	directa(velocidadPID);
+	if(proxsensorVal < 50 && proxsensorVal > 18) {
 		toPi = "::detener " + proxsensorVal;
-		//Serial.println(toPi);
+	//	//Serial.println(toPi);
 		detener(0);
 		//script para manejar velocidad y reversa
 	} else if (analogRead(proxsensor) < 18){
@@ -83,6 +89,5 @@ void loop() {
 		reversa(reverseVel);
 		Serial.println("::reversa");
 	}
-
-
+	Serial.flush();
 }
