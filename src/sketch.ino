@@ -13,7 +13,8 @@ unsigned long timeTotal = 0;
 int incomingByte = 0;
 int velocidadPID = 0;
 
-String toPi = 'ohsi';
+String recieve = String();
+String toPi = String();
 
 void setup() {
 	pinMode(ledPin, OUTPUT);
@@ -22,6 +23,7 @@ void setup() {
 	pinMode (velsensor, INPUT);
 	pinMode (proxsensor, INPUT);
 	Serial.begin(9600);
+	Serial.println("herw we go");
 }
 
 void directa(int velocidad) {
@@ -34,11 +36,12 @@ void reversa(int velocidad) {
 	analogWrite(reversaPin, velocidad);
 }
 
-void detener(velocidad) {
+void detener(int velocidad) {
 	//casi lo mismo que reversa
 	analogWrite(directaPin, 0);
 	analogWrite(reversaPin, velocidad);
 }
+
 
 void loop() {
 	if(analogRead(velsensor) < 800) {
@@ -52,21 +55,28 @@ void loop() {
 		digitalWrite(ledPin, LOW);
 	}
 
+	proxsensorVal = analogRead(proxsensor);
+
 	//lectura de serial
-	if (Serial.available() > 0) {
+	while (Serial.available() > 0) {
 			// read the incoming byte:
-			incomingByte = Serial.read();
-			velocidadPID = map(incomingByte, 0, 100, 0, 255);
+			recieve = Serial.readString();
+			if(recieve.toInt() < 500){
+				velocidadPID = map(recieve.toInt(), 0, 100, 0, 255);
+			} else {
+				reversa(255);
+				proxsensorVal = 1024;
+			}
+			Serial.println(recieve);
 	}
 
-	proxsensorVal = analogRead(proxsensor);
 
 	if (proxsensorVal > 50) {
 		directa(velocidadPID);
 	} else if(proxsensorVal < 50 && proxsensorVal > 18) {
 		toPi = "::detener " + proxsensorVal;
-		Serial.println(toPi);
-		detener(velocidadPID);
+		//Serial.println(toPi);
+		detener(0);
 		//script para manejar velocidad y reversa
 	} else if (analogRead(proxsensor) < 18){
 		reverseVel = map(proxsensorVal, 12, 18, 0, 255);

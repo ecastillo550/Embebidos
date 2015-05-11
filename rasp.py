@@ -34,7 +34,7 @@ def PID(velocidad):
 	respuesta = PIDvarOld + (K/ti)*(Ts+ti)*errorActual - (K*errorOld);
 
 	print("ref: " + str(velocidadReferencia));
-	print("Error: " + str(errorActual));
+#	print("Error: " + str(errorActual));
 	errorOld = errorActual;
 	PIDvarOld = respuesta;
 
@@ -51,16 +51,16 @@ thread.start_new_thread(input_thread, (L,));
 while True:
 	#ver velocidad
 	serialString = arduino.readline();
-	#print(serialString);
+	print(serialString);
 	if "::velup" in serialString:
 		tiempoVariable = time.time() - tiempoInicio;
 		tiempoInicio = time.time();
 		#4 cm radio = 12.5664   --- 1mm/ms = 1m/s
 		rapidezActual = 125.664 / (tiempoVariable*1000);
 		velToArduino = PID(rapidezActual);
-		print("rapidez actual: " + str(rapidezActual));
+#		print("rapidez actual: " + str(rapidezActual));
 		print("PID: " + str(velToArduino) + " \n ");
-		arduino.write(velToArduino);
+		arduino.write(str(velToArduino));
 		pass
 
 	if "::detener" in serialString:
