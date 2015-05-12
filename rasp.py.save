@@ -1,5 +1,6 @@
-	
+
 import time;
+
 import serial;
 import thread;
 import sys;
@@ -11,10 +12,10 @@ tiempoInicio = time.time();
 
 #variables de pid
 if len(sys.argv) > 1 :
-#	print(sys.argv[1]);
+	print(sys.argv[1]);
 	velocidadReferencia = float(sys.argv[1]);
 else :
-	velocidadReferencia = 0.33;
+	velocidadReferencia = 0.8;
 
 errorOld = 0;
 PIDvarOld = 0;
@@ -29,10 +30,9 @@ first = True;
 rapidezAnterior = 0;
 frenar = False;
 frenado = -100;
-ruido = 10;
+ruido = 5;
 errorSensor = ruido;
 totalStop = False;
-val = -100;
 
 def input_thread(L) :
 	string = raw_input();
@@ -52,9 +52,9 @@ def PID(velocidad):
 
 	errorActual = velocidadReferencia - velocidad;
 	respuesta = PIDvarOld + (K/ti)*(Ts+ti)*errorActual - (K*errorOld);
-#	print("Error: " + str(errorActual));
-#	print("velocidad: " + str(velocidad));
-#	print("Referencia: " + str(velocidadReferencia));
+	print("Error: " + str(errorActual));
+	print("velocidad: " + str(velocidad));
+	print("Referencia: " + str(velocidadReferencia));
 	
 	errorOld = errorActual;
 	PIDvarOld = respuesta;
@@ -96,11 +96,11 @@ while True:
 			tiempoVariable = time.time() - tiempoInicio;
 			#tiempoInicio = time.time();
 			#4 cm radio = 12.5664   --- 1mm/ms = 1m/s
-			#print("PID: " + str(velToArduino));
+			#print("PID: " + str(velToArduino) + " \n ");
 			#print("rapidez actual: " + str(rapidezActual));		
 			#print("referencia: " + str(velocidadReferencia));
 			#print("Error: " + str(errorActual));
-			#print("tiempo var: " + str(tiempoVariable));
+			print("tiempo var: " + str(tiempoVariable));
 			rapidezAnterior = rapidezActual;
 			rapidezActual = 125.664 / (tiempoVariable*1000);
 			if rapidezActual > 5 :
@@ -109,7 +109,6 @@ while True:
 				tiempoInicio = time.time();
 	
 		if proxSensor > 25 and frenar == False:
-			errorSensor = ruido;
 			if rapidezActual < 0 and frenar:
 				rapidezActual = 0.001;
 			time.sleep(0.00001); 
@@ -125,15 +124,13 @@ while True:
 				arduino.write("re"+str(velToArduino)+"$");
 				if frenar == False:
 					rapidezActual -= 0.05;
-#				print("bajo rapidez");
-			#print("PID: " + str(velToArduino) + "\n");
-			print("rapidez, referencia, pid," + str(rapidezActual) +"," + str(velocidadReferencia)  + "," + str(velToArduino) + ",");
+				print("bajo rapidez");
+			print("PID: " + str(velToArduino) + "\n");
 
 	else :
 		first = False;
-	
-#	print("ErrorSensor: " + str(errorSensor));
-	if proxSensor < 25 :
+
+	if proxSensor < 25:
 		#arduino.write("st$");
 		#print("detener");
 		#velocidadReferencia = 0.00001;
@@ -141,37 +138,20 @@ while True:
 		#velToArduino = 0;
 		#proxSensor = serialString.split(' ')[1];
 		errorSensor =- 1;
-		if errorSensor < 0:
-			frenar = True;
-
-		freno = map(proxSensor, 17, 25, -60, 0);
+		#if errorSensor < 0:
+		frenar = True;
+		freno = map(proxSensor, 16, 25, -100, 0);
 		if freno < 0 and totalStop == False:
 			#if rapidezActual > velocidadReferencia:
 			#	totalStop = True;
 			#else :
 			arduino.write("re"+str(freno)+"$");
-#			print("Se encontro un obstaculo a:" + str(proxSensor)+"\n");
+			print("Se encontro un obstaculo a:" + str(proxSensor)+"\n");
 			#frenado += 9;
-		if proxSensor < 18 and errorSensor <= 0:
+		if proxSensor < 15:
 			totalStop = True;
-			while val < 0 :
-				arduino.write("re"+str(val)+"$");
-				
-#				if rapidezActual > 0.8 :
-#					dec = 0.1;
-#					val += 1;
-#					time.sleep(float("0." + str(al)));
-				if rapidezActual > 0.5:
-					dec = 1;
-					val += 1;
-				elif rapidezActual > 0.3 and rapidezActual < 0.5 :
-					dec = 5;
-					val+= 5;
-				elif rapidezActual > 0.1 and rapidezActual < 0.3:
-					dec = 10;
-					val += 10;
 			arduino.write("st$");
-#			print("freno: " + str(rapidezActual) + " | decremento: " + str(dec));
+			print("freno");
 		#if proxSensor < 30:
 		#	velToArduino = 5;
 		#	pass
