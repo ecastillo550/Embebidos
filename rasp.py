@@ -30,7 +30,9 @@ rapidezAnterior = 0;
 frenar = False;
 frenado = -100;
 ruido = 10;
+frenadoEmergencia = False;
 errorSensor = ruido;
+errorSensor50 = 2;
 totalStop = False;
 val = -100;
 
@@ -73,6 +75,7 @@ L = [];
 thread.start_new_thread(input_thread, (L,));	
 
 arduino.write("di50$");
+rapidezFrenado = 0;
 
 while True:
 	#ver velocidad
@@ -97,8 +100,8 @@ while True:
 			#tiempoInicio = time.time();
 			#4 cm radio = 12.5664   --- 1mm/ms = 1m/s
 			#print("PID: " + str(velToArduino));
-			#print("rapidez actual: " + str(rapidezActual));		
-			#print("referencia: " + str(velocidadReferencia));
+#			print("rapidez actual: " + str(rapidezActual));		
+#			print("referencia: " + str(velocidadReferencia));
 			#print("Error: " + str(errorActual));
 			#print("tiempo var: " + str(tiempoVariable));
 			rapidezAnterior = rapidezActual;
@@ -126,11 +129,22 @@ while True:
 				if frenar == False:
 					rapidezActual -= 0.05;
 #				print("bajo rapidez");
-			#print("PID: " + str(velToArduino) + "\n");
-			print("rapidez, referencia, pid," + str(rapidezActual) +"," + str(velocidadReferencia)  + "," + str(velToArduino) + ",");
+#			print("PID: " + str(velToArduino) + "\n");
+			print("rapidez, referencia, tiempo, pid," + str(rapidezActual) +"," + str(velocidadReferencia) + "," + str(tiempoVariable)  + "," + str(velToArduino) + ",");
 
+		if proxSensor < 100 and velocidadReferencia > 0.7: #and (rapidezActual < 0.7 or rapidezFrenado < 0.7) :
+			velocidadReferencia = 0.01;
+#			rapidezFrenado = rapidezActual;
+#			print("Frenado Emergencia");
+#			arduino.write("re-100$");
+#			time.sleep(0.1);
 	else :
 		first = False;
+
+	if proxSensor < 60 :
+		errorSensor50 -= 1;
+		if errorSensor50 < 0:
+			frenadoEmergencia = True;
 	
 #	print("ErrorSensor: " + str(errorSensor));
 	if proxSensor < 25 :
@@ -161,13 +175,13 @@ while True:
 #					dec = 0.1;
 #					val += 1;
 #					time.sleep(float("0." + str(al)));
-				if rapidezActual > 0.5:
+				if rapidezActual >= 0.5:
 					dec = 1;
 					val += 1;
-				elif rapidezActual > 0.3 and rapidezActual < 0.5 :
+				elif rapidezActual >= 0.3 and rapidezActual < 0.5 :
 					dec = 5;
 					val+= 5;
-				elif rapidezActual > 0.1 and rapidezActual < 0.3:
+				elif rapidezActual >= 0.1 and rapidezActual < 0.3:
 					dec = 10;
 					val += 10;
 			arduino.write("st$");
