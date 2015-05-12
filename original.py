@@ -31,6 +31,10 @@ def input_thread(L) :
 	string = raw_input();
 	L.append(string);
 
+def map(x, inmin, inmax, outmin, outmax) :
+	return (x-inmin)*(outmax-outmin)/(inmax-inmin)+outmin;
+
+
 def PID(velocidad):
 	global velocidadReferencia;
 	global errorOld;
@@ -56,7 +60,7 @@ def PID(velocidad):
 	return respuesta;
 
 L = [];
-thread.start_new_thread(input_thread, (L,));	
+thread.start_new_thread(input_thread, (L,));
 
 arduino.write("di50$");
 
@@ -66,24 +70,24 @@ while True:
 	serialString = arduino.readline();
 	if serialString == '':
 		rapidezActual = 0;
-	
-	if time.time() - tiempoInicio > 0.3 and rapidezAnterior == rapidezActual : 
+
+	if time.time() - tiempoInicio > 0.3 and rapidezAnterior == rapidezActual :
 		rapidezActual -= 0.05;
 		#PIDvarOld = 0;
 		#errorOld = 0;
-		
+
 	#print(serialString);
 	if "::prox" in serialString:
 		proxSensor = int(serialString.split(' ')[1]);
 #		print(int(proxSensor));
-	
+
 	if "::velup" in serialString and first == False or rapidezActual == 0 or first:
 		if "::velup" in serialString :
 			tiempoVariable = time.time() - tiempoInicio;
 			#tiempoInicio = time.time();
 			#4 cm radio = 12.5664   --- 1mm/ms = 1m/s
 			#print("PID: " + str(velToArduino) + " \n ");
-			#print("rapidez actual: " + str(rapidezActual));		
+			#print("rapidez actual: " + str(rapidezActual));
 			#print("referencia: " + str(velocidadReferencia));
 			#print("Error: " + str(errorActual));
 			print("tiempo var: " + str(tiempoVariable));
@@ -93,9 +97,9 @@ while True:
 				rapidezActual = rapidezAnterior;
 			else :
 				tiempoInicio = time.time();
-	
+
 		if proxSensor > 50:
-			time.sleep(0.00001); 
+			time.sleep(0.00001);
 			velToArduino = PID(rapidezActual);
 			if velToArduino > 0:
 				arduino.write("di" + str(velToArduino)+"$");
@@ -111,27 +115,19 @@ while True:
 	else :
 		first = False;
 
-	if proxSensor < 20:
+	if proxSensor > 25 and proxSensor < 50:
 		arduino.write("st$");
-		#print("detener");
-	
-		#velToArduino = 0;
-		#proxSensor = serialString.split(' ')[1];
+
+	if proxSensor < 25:
+		vel = map(proxSensor, 12, 25, -100, 0);
+		arduino.write("re$"str(vel)+"$");
+
 
 		print("Se encontro un obstaculo a:" + str(proxSensor));
-		#if proxSensor < 30:
-		#	velToArduino = 5;
-		#	pass
-		#if proxSensor < 25:
-		#	velToArduino = 50;
-		#	pass
+
 
 		#print("reversa en: " + str(velToArduino) + " \n ");
-#	rapidezActual -= 0.01;
-#	print("\n");
 
-	#rapidexAnterior = rapidezActual;
-	#manejo de thread para cambiar velocidad
 	if L :
 		try :
 			velocidadReferencia = float(L[0]);
