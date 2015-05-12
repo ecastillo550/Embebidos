@@ -50,44 +50,34 @@ void loop() {
 		digitalWrite(ledPin, HIGH);
 		timeTotal = millis() - timeInicio;
 		timeInicio = millis();
-		if(timeTotal > 20) {
+		if(timeTotal > 30) {
 			Serial.println("::velup");
 		}
 	} else {
 		digitalWrite(ledPin, LOW);
 	}
 	proxsensorVal = analogRead(proxsensor);
-
+	toPi = "::prox ";
+	toPi.concat(proxsensorVal);
+	Serial.println(toPi);
 	//lectura de serial
 	while (Serial.available() > 0) {
 		recieve = Serial.readStringUntil('$');
 		//Serial.println(recieve.substring(0,2));
 		//Serial.println(recieve.substring(2));
 		if(recieve.substring(0,2) == "di"){
-			if(proxsensorVal > 50){
-				//Serial.println(recieve);
-				velocidadPID = map(recieve.substring(2).toInt(), 0, 100, 0, 255);
-				directa(velocidadPID);
-			}
+			//Serial.println(recieve);
+			velocidadPID = map(recieve.substring(2).toInt(), 0, 100, 0, 255);
+			directa(velocidadPID);
 		} else if(recieve.substring(0,2) == "re") {
 			reversa(255);
 			proxsensorVal = 1024;
+			Serial.println("patras");
+		} else if(recieve.substring(0,2) == "st") {
+			detener(0);
+			Serial.println("detener");
 		}
 		//Serial.println(recieve);
-	}
-
-
-	//if (proxsensorVal > 50) {
-	//	directa(velocidadPID);
-	if(proxsensorVal < 50 && proxsensorVal > 18) {
-		toPi = "::detener " + proxsensorVal;
-	//	//Serial.println(toPi);
-		detener(0);
-		//script para manejar velocidad y reversa
-	} else if (analogRead(proxsensor) < 18){
-		reverseVel = map(proxsensorVal, 12, 18, 0, 255);
-		reversa(reverseVel);
-		Serial.println("::reversa");
 	}
 	Serial.flush();
 }
