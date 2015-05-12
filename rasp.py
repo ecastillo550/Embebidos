@@ -54,8 +54,8 @@ def PID(velocidad):
 
 	errorActual = velocidadReferencia - velocidad;
 	respuesta = PIDvarOld + (K/ti)*(Ts+ti)*errorActual - (K*errorOld);
-#	print("Error: " + str(errorActual));
-#	print("velocidad: " + str(velocidad));
+	print("Error: " + str(errorActual));
+	print("velocidad: " + str(velocidad));
 #	print("Referencia: " + str(velocidadReferencia));
 	
 	errorOld = errorActual;
@@ -128,9 +128,9 @@ while True:
 				arduino.write("re"+str(velToArduino)+"$");
 				if frenar == False:
 					rapidezActual -= 0.05;
-#				print("bajo rapidez");
+				print("bajo rapidez");
 			#print("PID: " + str(velToArduino) + "\n");
-			print("rapidez, referencia, tiempo, pid," + str(rapidezActual) +"," + str(velocidadReferencia) + "," + str(time.time())  + "," + str(velToArduino) + ",");
+#			print("rapidez, referencia, tiempo, pid," + str(rapidezActual) +"," + str(velocidadReferencia) + "," + str(time.time())  + "," + str(velToArduino) + ",");
 
 		if proxSensor < 100 and velocidadReferencia > 0.7: #and (rapidezActual < 0.7 or rapidezFrenado < 0.7) :
 			velocidadReferencia = 0.01;
@@ -164,7 +164,7 @@ while True:
 			#	totalStop = True;
 			#else :
 			arduino.write("re"+str(freno)+"$");
-#			print("Se encontro un obstaculo a:" + str(proxSensor)+"\n");
+			print("Se encontro un obstaculo a:" + str(proxSensor)+"\n");
 			#frenado += 9;
 		if proxSensor < 18 and errorSensor <= 0:
 			totalStop = True;
@@ -185,7 +185,7 @@ while True:
 					dec = 10;
 					val += 10;
 			arduino.write("st$");
-#			print("freno: " + str(rapidezActual) + " | decremento: " + str(dec));
+			print("freno: " + str(rapidezActual) + " | decremento: " + str(dec));
 		#if proxSensor < 30:
 		#	velToArduino = 5;
 		#	pass

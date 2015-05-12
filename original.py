@@ -120,7 +120,7 @@ while True:
 
 	if proxSensor < 25:
 		vel = map(proxSensor, 12, 25, -100, 0);
-		arduino.write("re$" +str(vel)+"$");
+		arduino.write("re" +str(vel)+"$");
 
 
 		print("Se encontro un obstaculo a:" + str(proxSensor));
