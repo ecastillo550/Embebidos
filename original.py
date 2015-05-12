@@ -46,8 +46,8 @@ def PID(velocidad):
 
 	errorActual = velocidadReferencia - velocidad;
 	respuesta = PIDvarOld + (K/ti)*(Ts+ti)*errorActual - (K*errorOld);
-	print("Error: " + str(errorActual));
-	print("velocidad: " + str(velocidad));
+#	print("Error: " + str(errorActual));
+#	print("velocidad: " + str(velocidad));
 
 	errorOld = errorActual;
 	PIDvarOld = respuesta;
@@ -63,7 +63,9 @@ L = [];
 thread.start_new_thread(input_thread, (L,));
 
 arduino.write("di50$");
-
+ruido = 2;
+errorSensor = ruido;
+reversa = False;
 while True:
 	#ver velocidad
 	serialString = '';
@@ -90,7 +92,7 @@ while True:
 			#print("rapidez actual: " + str(rapidezActual));
 			#print("referencia: " + str(velocidadReferencia));
 			#print("Error: " + str(errorActual));
-			print("tiempo var: " + str(tiempoVariable));
+		#	print("tiempo var: " + str(tiempoVariable));
 			rapidezAnterior = rapidezActual;
 			rapidezActual = 125.664 / (tiempoVariable*1000);
 			if rapidezActual > 5 :
@@ -99,6 +101,8 @@ while True:
 				tiempoInicio = time.time();
 
 		if proxSensor > 50:
+			reversa = False;
+			errorSensor = ruido;
 			time.sleep(0.00001);
 			velToArduino = PID(rapidezActual);
 			if velToArduino > 0:
@@ -110,20 +114,26 @@ while True:
 				arduino.write("re"+str(velToArduino)+"$");
 				rapidezActual -= 0.05;
 				print("bajo rapidez");
-			print("PID: " + str(velToArduino));
+		#	print("PID: " + str(velToArduino));
 
 	else :
 		first = False;
 
-	if proxSensor > 25 and proxSensor < 50:
-		arduino.write("st$");
+	if proxSensor > 35 and proxSensor < 50:
+		if errorSensor <= 0 and reversa == False:
+			arduino.write("st$");
+			print("STOP")
+		errorSensor -= 1;
 
 	if proxSensor < 25:
-		vel = map(proxSensor, 12, 25, -100, 0);
-		arduino.write("re" +str(vel)+"$");
+		if errorSensor <=0:
+			vel = map(proxSensor, 12, 25, -100, 0);
+			arduino.write("re" +str(vel)+"$");
+			print("reversa");
+			reversa = True;
+		errorSensor -= 1;
 
-
-		print("Se encontro un obstaculo a:" + str(proxSensor));
+		#print("Se encontro un obstaculo a:" + str(proxSensor));
 
 
 		#print("reversa en: " + str(velToArduino) + " \n ");
