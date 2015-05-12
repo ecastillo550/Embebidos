@@ -13,7 +13,7 @@ L = [];
 thread.start_new_thread(input_thread, (L,));
 
 while run:
-	arduino.write("re$");
+	arduino.write("re-65$");
 	time.sleep(1);
 	print(arduino.readline());
 	#manejo de thread para cambiar velocidad

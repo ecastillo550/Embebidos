@@ -78,12 +78,12 @@ void loop() {
 			velocidadPID = map(recieve.substring(2).toInt(), 0, 100, 0, 255);
 			directa(velocidadPID);
 		} else if(recieve.substring(0,2) == "re") {
-			reversa(255);
-			proxsensorVal = 1024;
-			Serial.println("patras");
+			velocidadPID = map(recieve.substring(2).toInt(), 0, -100, 0, 255);
+			reversa(velocidadPID);
+			//Serial.println("patras");
 		} else if(recieve.substring(0,2) == "st") {
 			detener(0);
-			Serial.println("detener");
+			//Serial.println("detener");
 		}
 		//Serial.println(recieve);
 	}
