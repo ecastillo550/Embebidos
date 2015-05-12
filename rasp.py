@@ -129,8 +129,8 @@ while True:
 				if frenar == False:
 					rapidezActual -= 0.05;
 #				print("bajo rapidez");
-#			print("PID: " + str(velToArduino) + "\n");
-			print("rapidez, referencia, tiempo, pid," + str(rapidezActual) +"," + str(velocidadReferencia) + "," + str(tiempoVariable)  + "," + str(velToArduino) + ",");
+			#print("PID: " + str(velToArduino) + "\n");
+			print("rapidez, referencia, tiempo, pid," + str(rapidezActual) +"," + str(velocidadReferencia) + "," + str(time.time())  + "," + str(velToArduino) + ",");
 
 		if proxSensor < 100 and velocidadReferencia > 0.7: #and (rapidezActual < 0.7 or rapidezFrenado < 0.7) :
 			velocidadReferencia = 0.01;
